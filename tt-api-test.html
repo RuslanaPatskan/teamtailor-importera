@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>TT API Test Suite</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #2d3436; }
+    .header { background: linear-gradient(135deg, #e84b3c, #c0392b); padding: 16px 24px; color: #fff; }
+    .header h1 { font-size: 18px; }
+    .header p  { font-size: 12px; opacity: .8; margin-top: 2px; }
+    .container { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+    .card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.06); margin-bottom: 16px; }
+    .card h2 { font-size: 13px; font-weight: 700; color: #e84b3c; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; }
+    .row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+    input[type=password], input[type=text] { flex: 1; padding: 8px 10px; border: 1.5px solid #dfe6e9; border-radius: 7px; font-size: 13px; outline: none; }
+    input:focus { border-color: #e84b3c; }
+    button { padding: 8px 18px; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .btn-primary { background: #e84b3c; color: #fff; }
+    .btn-secondary { background: #f0f2f5; color: #2d3436; }
+    .btn-danger { background: #c0392b; color: #fff; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    #results { display: flex; flex-direction: column; gap: 8px; }
+    .test-item { border-radius: 8px; padding: 10px 14px; font-size: 12px; border: 1.5px solid transparent; }
+    .test-item.pending  { background: #f0f2f5; color: #636e72; border-color: #dfe6e9; }
+    .test-item.running  { background: #fff3cd; color: #856404; border-color: #ffc107; }
+    .test-item.ok       { background: #d4edda; color: #155724; border-color: #c3e6cb; }
+    .test-item.error    { background: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+    .test-item.skip     { background: #e2e3e5; color: #6c757d; border-color: #d3d3d3; }
+    .test-name { font-weight: 700; margin-bottom: 3px; }
+    .test-detail { font-family: monospace; font-size: 11px; opacity: .85; white-space: pre-wrap; word-break: break-all; max-height: 120px; overflow-y: auto; }
+    .summary { display: flex; gap: 12px; font-size: 13px; font-weight: 600; }
+    .summary span { padding: 4px 12px; border-radius: 12px; }
+    .s-ok  { background: #d4edda; color: #155724; }
+    .s-err { background: #f8d7da; color: #721c24; }
+    .s-skip{ background: #e2e3e5; color: #6c757d; }
+    .cleanup-note { font-size: 11px; color: #b2bec3; margin-top: 6px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🧪 Teamtailor API Test Suite</h1>
+  <p>Перевірка всіх endpoint'ів що використовує розширення</p>
+</div>
+
+<div class="container">
+  <div class="card">
+    <h2>⚙️ Конфігурація</h2>
+    <div class="row">
+      <input type="password" id="api-key" placeholder="Teamtailor API ключ...">
+      <button class="btn-primary" id="btn-run">▶ Запустити всі тести</button>
+      <button class="btn-secondary" id="btn-clear">Очистити</button>
+    </div>
+    <div class="row">
+      <input type="text" id="test-email" placeholder="Email тестового кандидата (для cleanup)" value="tt-api-test-delete-me@example.com">
+    </div>
+    <div class="cleanup-note">⚠️ Тест створює тестового кандидата і видаляє його в кінці. Email вище використовується для ідентифікації.</div>
+  </div>
+
+  <div class="card" id="summary-card" style="display:none">
+    <h2>📊 Результати</h2>
+    <div class="summary" id="summary"></div>
+  </div>
+
+  <div class="card">
+    <h2>🔬 Тести</h2>
+    <div id="results"></div>
+  </div>
+</div>
+
+<script>
+const TT_BASE = 'https://api.teamtailor.com/v1';
+const TT_VER  = '20240904';
+
+let apiKey = '';
+let createdCandidateId = null;
+let createdJobAppId    = null;
+let createdNoteId      = null;
+let createdCfValueId   = null;
+
+function headers() {
+  return {
+    'Authorization': `Token token=${apiKey}`,
+    'Content-Type':  'application/vnd.api+json',
+    'Accept':        'application/vnd.api+json',
+    'X-Api-Version': TT_VER
+  };
+}
+
+// ── Тести ─────────────────────────────────────────────────
+const TESTS = [
+  {
+    id: 'auth',
+    name: 'GET /candidates — перевірка авторизації',
+    run: async () => {
+      const r = await fetch(`${TT_BASE}/candidates?page[size]=1`, { headers: headers() });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const b = await r.json();
+      return `✅ OK — всього кандидатів: ${b?.meta?.record_count ?? '?'}`;
+    }
+  },
+  {
+    id: 'jobs',
+    name: 'GET /jobs — список вакансій',
+    run: async () => {
+      const r = await fetch(`${TT_BASE}/jobs?page[size]=5`, { headers: headers() });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const b = await r.json();
+      return `✅ ${b.data?.length ?? 0} вакансій`;
+    }
+  },
+  {
+    id: 'locations',
+    name: 'GET /locations — список локацій',
+    run: async () => {
+      const r = await fetch(`${TT_BASE}/locations?page[size]=10`, { headers: headers() });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const b = await r.json();
+      return `✅ ${b.data?.length ?? 0} локацій`;
+    }
+  },
+  {
+    id: 'departments',
+    name: 'GET /departments — список відділів',
+    run: async () => {
+      const r = await fetch(`${TT_BASE}/departments?page[size]=10`, { headers: headers() });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const b = await r.json();
+      return `✅ ${b.data?.length ?? 0} відділів`;
+    }
+  },
+  {
+    id: 'roles',
+    name: 'GET /roles — список ролей',
+    run: async () => {
+      const r = await fetch(`${TT_BASE}/roles?page[size]=10`, { headers: headers() });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const b = await r.json();
+      return `✅ ${b.data?.length ?? 0} ролей`;
+    }
+  },
+  {
+    id: 'users',
+    name: 'GET /users?include=role — користувачі з ролями',
+    run: async () => {
+      const r = await fetch(`${TT_BASE}/users?page[size]=10&include=role`, { headers: headers() });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const b = await r.json();
+      const names = (b.data || []).slice(0, 3).map(u =>
+        `${u.attributes?.['first-name']} ${u.attributes?.['last-name']}`.trim()
+      );
+      return `✅ ${b.data?.length ?? 0} користувачів: ${names.join(', ')}`;
+    }
+  },
+  {
+    id: 'custom-fields',
+    name: 'GET /custom-fields — кастомні поля',
+    run: async () => {
+      const r = await fetch(`${TT_BASE}/custom-fields?page[size]=10`, { headers: headers() });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const b = await r.json();
+      const names = (b.data || []).map(f => f.attributes?.['api-name'] || f.attributes?.name).filter(Boolean);
+      return `✅ ${b.data?.length ?? 0} полів: ${names.slice(0,5).join(', ')}`;
+    }
+  },
+  {
+    id: 'filter-phone',
+    name: 'GET /candidates?filter[phone] — пошук за телефоном',
+    run: async () => {
+      const r = await fetch(`${TT_BASE}/candidates?filter[phone]=%2B380000000001&page[size]=1`, { headers: headers() });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const b = await r.json();
+      return `✅ Фільтр phone працює — знайдено: ${b.data?.length ?? 0}`;
+    }
+  },
+  {
+    id: 'filter-email',
+    name: 'GET /candidates?filter[email] — пошук за email',
+    run: async () => {
+      const r = await fetch(`${TT_BASE}/candidates?filter[email]=nonexistent@test.test&page[size]=1`, { headers: headers() });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const b = await r.json();
+      return `✅ Фільтр email працює — знайдено: ${b.data?.length ?? 0}`;
+    }
+  },
+  {
+    id: 'filter-name',
+    name: 'GET /candidates?filter[first-name]+filter[last-name] — пошук за іменем',
+    run: async () => {
+      const r = await fetch(`${TT_BASE}/candidates?filter[first-name]=Test&filter[last-name]=Candidate&page[size]=5`, { headers: headers() });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const b = await r.json();
+      return `✅ Фільтр first/last-name працює — знайдено: ${b.data?.length ?? 0}`;
+    }
+  },
+  {
+    id: 'filter-query',
+    name: 'GET /candidates?filter[query] — повнотекстовий пошук',
+    run: async () => {
+      const r = await fetch(`${TT_BASE}/candidates?filter[query]=test&page[size]=3`, { headers: headers() });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const b = await r.json();
+      return `✅ filter[query] працює — знайдено: ${b.data?.length ?? 0}`;
+    }
+  },
+  {
+    id: 'create-candidate',
+    name: 'POST /candidates — створення тестового кандидата',
+    run: async () => {
+      const email = document.getElementById('test-email').value.trim();
+      const r = await fetch(`${TT_BASE}/candidates`, {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify({ data: { type: 'candidates', attributes: {
+          'first-name': 'API',
+          'last-name':  'TestCandidate',
+          'email':      email,
+          'phone':      '+380000000099',
+          'pitch':      'Test',
+          'sourced':    true,
+          'merge':      true,
+          'tags':       ['test-api-run']
+        }}})
+      });
+      const b = await r.json();
+      if (!r.ok) throw new Error(`HTTP ${r.status}: ${JSON.stringify(b?.errors?.[0])}`);
+      createdCandidateId = b.data?.id;
+      return `✅ Створено ID: ${createdCandidateId}`;
+    }
+  },
+  {
+    id: 'get-candidate',
+    name: 'GET /candidates/:id — читання кандидата',
+    depends: 'create-candidate',
+    run: async () => {
+      const r = await fetch(`${TT_BASE}/candidates/${createdCandidateId}`, { headers: headers() });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const b = await r.json();
+      return `✅ ${b.data?.attributes?.['first-name']} ${b.data?.attributes?.['last-name']} — email: ${b.data?.attributes?.email}`;
+    }
+  },
+  {
+    id: 'get-candidate-with-cf',
+    name: 'GET /candidates/:id?include=custom-field-values — кандидат з custom fields',
+    depends: 'create-candidate',
+    run: async () => {
+      const r = await fetch(`${TT_BASE}/candidates/${createdCandidateId}?include=custom-field-values`, { headers: headers() });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const b = await r.json();
+      const cfCount = (b.included || []).filter(i => i.type === 'custom-field-values').length;
+      return `✅ included: ${b.included?.length ?? 0} (custom-field-values: ${cfCount})`;
+    }
+  },
+  {
+    id: 'patch-candidate',
+    name: 'PATCH /candidates/:id — оновлення кандидата',
+    depends: 'create-candidate',
+    run: async () => {
+      const r = await fetch(`${TT_BASE}/candidates/${createdCandidateId}`, {
+        method: 'PATCH',
+        headers: headers(),
+        body: JSON.stringify({ data: { type: 'candidates', id: String(createdCandidateId),
+          attributes: { 'pitch': 'Updated by API test', 'tags': ['test-api-run', 'robota.ua'] }
+        }})
+      });
+      if (!r.ok) { const b = await r.json(); throw new Error(`HTTP ${r.status}: ${JSON.stringify(b?.errors?.[0])}`); }
+      return `✅ PATCH /candidates/:id успішно`;
+    }
+  },
+  {
+    id: 'patch-dept',
+    name: 'PATCH /candidates/:id/relationships/department — відділ',
+    depends: 'create-candidate',
+    run: async () => {
+      // Беремо перший відділ
+      const dr = await fetch(`${TT_BASE}/departments?page[size]=1`, { headers: headers() });
+      const db = await dr.json();
+      const deptId = db.data?.[0]?.id;
+      if (!deptId) return '⏭ Пропущено — немає відділів';
+      const r = await fetch(`${TT_BASE}/candidates/${createdCandidateId}/relationships/department`, {
+        method: 'PATCH',
+        headers: headers(),
+        body: JSON.stringify({ data: { type: 'departments', id: String(deptId) } })
+      });
+      if (!r.ok) { const b = await r.json().catch(()=>({})); throw new Error(`HTTP ${r.status}: ${JSON.stringify(b?.errors?.[0])}`); }
+      return `✅ Відділ ${deptId} прив'язано`;
+    }
+  },
+  {
+    id: 'post-location',
+    name: 'POST /candidates/:id/relationships/locations — локація',
+    depends: 'create-candidate',
+    run: async () => {
+      const lr = await fetch(`${TT_BASE}/locations?page[size]=1`, { headers: headers() });
+      const lb = await lr.json();
+      const locId = lb.data?.[0]?.id;
+      if (!locId) return '⏭ Пропущено — немає локацій';
+      const r = await fetch(`${TT_BASE}/candidates/${createdCandidateId}/relationships/locations`, {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify({ data: [{ type: 'locations', id: String(locId) }] })
+      });
+      if (!r.ok) { const b = await r.json().catch(()=>({})); throw new Error(`HTTP ${r.status}: ${JSON.stringify(b?.errors?.[0])}`); }
+      return `✅ Локація ${locId} додана`;
+    }
+  },
+  {
+    id: 'create-job-app',
+    name: 'POST /job-applications — прив'язка до вакансії',
+    depends: 'create-candidate',
+    run: async () => {
+      const jr = await fetch(`${TT_BASE}/jobs?page[size]=1`, { headers: headers() });
+      const jb = await jr.json();
+      const jobId = jb.data?.[0]?.id;
+      if (!jobId) return '⏭ Пропущено — немає вакансій';
+      const r = await fetch(`${TT_BASE}/job-applications`, {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify({ data: { type: 'job-applications',
+          attributes: { 'cover-letter': 'Test cover letter from API test' },
+          relationships: {
+            candidate: { data: { type: 'candidates',       id: String(createdCandidateId) } },
+            job:       { data: { type: 'jobs', id: String(jobId) } }
+          }
+        }})
+      });
+      const b = await r.json();
+      if (!r.ok) throw new Error(`HTTP ${r.status}: ${JSON.stringify(b?.errors?.[0])}`);
+      createdJobAppId = b.data?.id;
+      return `✅ Job-application ${createdJobAppId} створено (job: ${jobId})`;
+    }
+  },
+  {
+    id: 'patch-job-app',
+    name: 'PATCH /job-applications/:id — оновлення cover-letter',
+    depends: 'create-job-app',
+    run: async () => {
+      if (!createdJobAppId) return '⏭ Пропущено — job-app не створено';
+      const r = await fetch(`${TT_BASE}/job-applications/${createdJobAppId}`, {
+        method: 'PATCH',
+        headers: headers(),
+        body: JSON.stringify({ data: { type: 'job-applications', id: String(createdJobAppId),
+          attributes: { 'cover-letter': 'Updated cover letter' }
+        }})
+      });
+      if (!r.ok) { const b = await r.json().catch(()=>({})); throw new Error(`HTTP ${r.status}: ${JSON.stringify(b?.errors?.[0])}`); }
+      return `✅ PATCH /job-applications/:id успішно`;
+    }
+  },
+  {
+    id: 'get-user',
+    name: 'GET /users?page[size]=1 — поточний user ID',
+    run: async () => {
+      const r = await fetch(`${TT_BASE}/users?page[size]=1`, { headers: headers() });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const b = await r.json();
+      const u = b.data?.[0];
+      return `✅ User ID: ${u?.id} — ${u?.attributes?.['first-name']} ${u?.attributes?.['last-name']}`;
+    }
+  },
+  {
+    id: 'create-note',
+    name: 'POST /notes — нотатка на кандидата',
+    depends: 'create-candidate',
+    run: async () => {
+      // Беремо userId
+      const ur = await fetch(`${TT_BASE}/users?page[size]=1`, { headers: headers() });
+      const ub = await ur.json();
+      const userId = ub.data?.[0]?.id;
+      const relationships = {
+        candidate: { data: { type: 'candidates', id: String(createdCandidateId) } }
+      };
+      if (userId) relationships.user = { data: { type: 'users', id: String(userId) } };
+      const r = await fetch(`${TT_BASE}/notes`, {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify({ data: { type: 'notes',
+          attributes: { note: '🧪 API test note — можна видалити' },
+          relationships
+        }})
+      });
+      const b = await r.json();
+      if (!r.ok) throw new Error(`HTTP ${r.status}: ${JSON.stringify(b?.errors?.[0])}`);
+      createdNoteId = b.data?.id;
+      return `✅ Note ${createdNoteId} створено`;
+    }
+  },
+  {
+    id: 'create-cf-value',
+    name: 'POST /custom-field-values — запис у кастомне поле',
+    depends: 'create-candidate',
+    run: async () => {
+      const cr = await fetch(`${TT_BASE}/custom-fields?page[size]=5`, { headers: headers() });
+      const cb = await cr.json();
+      // Шукаємо URL або Text поле
+      const cf = (cb.data || []).find(f =>
+        ['CustomField::Url','CustomField::Text'].includes(f.attributes?.['field-type'])
+      );
+      if (!cf) return '⏭ Пропущено — немає URL/Text custom field';
+      const r = await fetch(`${TT_BASE}/custom-field-values`, {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify({ data: { type: 'custom-field-values',
+          attributes: { value: 'https://robota.ua/test-api' },
+          relationships: {
+            owner:          { data: { type: 'candidates',    id: String(createdCandidateId) } },
+            'custom-field': { data: { type: 'custom-fields', id: String(cf.id) } }
+          }
+        }})
+      });
+      const b = await r.json();
+      if (!r.ok) throw new Error(`HTTP ${r.status}: ${JSON.stringify(b?.errors?.[0])}`);
+      createdCfValueId = b.data?.id;
+      return `✅ custom-field-value ${createdCfValueId} (field: ${cf.attributes?.['api-name'] || cf.id})`;
+    }
+  },
+  {
+    id: 'patch-cf-value',
+    name: 'PATCH /custom-field-values/:id — оновлення значення',
+    depends: 'create-cf-value',
+    run: async () => {
+      if (!createdCfValueId) return '⏭ Пропущено';
+      const r = await fetch(`${TT_BASE}/custom-field-values/${createdCfValueId}`, {
+        method: 'PATCH',
+        headers: headers(),
+        body: JSON.stringify({ data: { type: 'custom-field-values', id: String(createdCfValueId),
+          attributes: { value: 'https://robota.ua/test-api-updated' }
+        }})
+      });
+      if (!r.ok) { const b = await r.json().catch(()=>({})); throw new Error(`HTTP ${r.status}: ${JSON.stringify(b?.errors?.[0])}`); }
+      return `✅ PATCH /custom-field-values/:id успішно`;
+    }
+  },
+  {
+    id: 'cf-via-include',
+    name: 'GET candidate?include=custom-field-values — знайти CF через include',
+    depends: 'create-cf-value',
+    run: async () => {
+      const r = await fetch(`${TT_BASE}/candidates/${createdCandidateId}?include=custom-field-values`, { headers: headers() });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const b = await r.json();
+      const cfVals = (b.included || []).filter(i => i.type === 'custom-field-values');
+      const found = cfVals.find(v => v.id === String(createdCfValueId));
+      return found
+        ? `✅ CF value знайдено через include (id: ${found.id}, value: ${found.attributes?.value})`
+        : `⚠️ CF value не знайдено серед ${cfVals.length} included`;
+    }
+  },
+  {
+    id: 'cleanup',
+    name: '🗑️ DELETE /candidates/:id — видалення тестового кандидата',
+    depends: 'create-candidate',
+    run: async () => {
+      const r = await fetch(`${TT_BASE}/candidates/${createdCandidateId}`, {
+        method: 'DELETE',
+        headers: headers()
+      });
+      if (r.status === 204 || r.ok) {
+        createdCandidateId = null;
+        return `✅ Кандидата видалено`;
+      }
+      const b = await r.json().catch(() => ({}));
+      throw new Error(`HTTP ${r.status}: ${JSON.stringify(b?.errors?.[0])}`);
+    }
+  }
+];
+
+// ── UI ────────────────────────────────────────────────────
+const resultsEl = document.getElementById('results');
+const states = {};
+
+function renderAll() {
+  resultsEl.innerHTML = '';
+  TESTS.forEach(t => {
+    const el = document.createElement('div');
+    el.id = `test-${t.id}`;
+    el.className = `test-item ${states[t.id]?.status || 'pending'}`;
+    const icon = { pending:'⬜', running:'⏳', ok:'✅', error:'❌', skip:'⏭' }[states[t.id]?.status || 'pending'];
+    el.innerHTML = `<div class="test-name">${icon} ${t.name}</div>`
+      + (states[t.id]?.detail ? `<div class="test-detail">${states[t.id].detail}</div>` : '');
+    resultsEl.appendChild(el);
+  });
+}
+
+function updateTest(id, status, detail) {
+  states[id] = { status, detail };
+  const el = document.getElementById(`test-${id}`);
+  if (el) {
+    el.className = `test-item ${status}`;
+    const icon = { pending:'⬜', running:'⏳', ok:'✅', error:'❌', skip:'⏭' }[status];
+    const t = TESTS.find(t => t.id === id);
+    el.innerHTML = `<div class="test-name">${icon} ${t.name}</div>`
+      + (detail ? `<div class="test-detail">${detail}</div>` : '');
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  updateSummary();
+}
+
+function updateSummary() {
+  const ok   = Object.values(states).filter(s => s.status === 'ok').length;
+  const err  = Object.values(states).filter(s => s.status === 'error').length;
+  const skip = Object.values(states).filter(s => s.status === 'skip').length;
+  document.getElementById('summary-card').style.display = '';
+  document.getElementById('summary').innerHTML =
+    `<span class="s-ok">✅ ${ok} пройшли</span>`
+    + (err  ? `<span class="s-err">❌ ${err} помилок</span>` : '')
+    + (skip ? `<span class="s-skip">⏭ ${skip} пропущено</span>` : '');
+}
+
+document.getElementById('btn-clear').addEventListener('click', () => {
+  Object.keys(states).forEach(k => delete states[k]);
+  createdCandidateId = createdJobAppId = createdNoteId = createdCfValueId = null;
+  renderAll();
+  document.getElementById('summary-card').style.display = 'none';
+});
+
+document.getElementById('btn-run').addEventListener('click', async () => {
+  apiKey = document.getElementById('api-key').value.trim();
+  if (!apiKey) { alert('Введіть API ключ'); return; }
+
+  const btn = document.getElementById('btn-run');
+  btn.disabled = true;
+  btn.textContent = '⏳ Виконується...';
+
+  Object.keys(states).forEach(k => delete states[k]);
+  createdCandidateId = createdJobAppId = createdNoteId = createdCfValueId = null;
+  renderAll();
+
+  const passed = new Set();
+
+  for (const test of TESTS) {
+    // Перевіряємо залежність
+    if (test.depends && !passed.has(test.depends)) {
+      updateTest(test.id, 'skip', `Пропущено — залежний тест '${test.depends}' не пройшов`);
+      continue;
+    }
+
+    updateTest(test.id, 'running', '');
+
+    try {
+      const result = await test.run();
+      if (result && result.startsWith('⏭')) {
+        updateTest(test.id, 'skip', result);
+        passed.add(test.id); // skip не блокує залежні
+      } else {
+        updateTest(test.id, 'ok', result);
+        passed.add(test.id);
+      }
+    } catch(e) {
+      updateTest(test.id, 'error', e.message);
+    }
+
+    // Пауза між тестами щоб не спровокувати 429
+    await new Promise(r => setTimeout(r, 300));
+  }
+
+  btn.disabled = false;
+  btn.textContent = '▶ Запустити всі тести';
+});
+
+renderAll();
+</script>
+</body>
+</html>

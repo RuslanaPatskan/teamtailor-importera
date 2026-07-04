@@ -1,0 +1,145 @@
+{
+  "manifest_version": 3,
+  "name": "Teamtailor Importera",
+  "version": "5.5.53",
+  "description": "Імпорт кандидатів з robota.ua та work.ua в Teamtailor ATS",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://robota.ua/my/vacancies/*/candidates*",
+        "*://robota.ua/my/vacancies/*/recommended*",
+        "*://robota.ua/my/vacancies/*/applies*",
+        "*://robota.ua/my/vacancies/*/interactions*",
+        "*://robota.ua/my/vacancies/all/applies*",
+        "*://robota.ua/my/vacancies/all/candidates*",
+        "*://robota.ua/my/candidates*",
+        "*://robota.ua/my/cvdb*",
+        "*://robota.ua/candidates/all/*",
+        "*://robota.ua/candidates/*"
+      ],
+      "js": [
+        "content/robota-spy.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "*://robota.ua/my/vacancies/*/candidates*",
+        "*://robota.ua/my/vacancies/*/recommended*",
+        "*://robota.ua/my/vacancies/*/applies*",
+        "*://robota.ua/my/vacancies/*/interactions*",
+        "*://robota.ua/my/vacancies/all/applies*",
+        "*://robota.ua/my/vacancies/all/candidates*",
+        "*://robota.ua/my/candidates*",
+        "*://robota.ua/my/cvdb*",
+        "*://robota.ua/candidates/all/*",
+        "*://robota.ua/candidates/*"
+      ],
+      "js": [
+        "content/robota.js"
+      ],
+      "css": [
+        "content/badges.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "*://www.work.ua/employer/my/applicants/*",
+        "*://www.work.ua/employer/my/responses/*",
+        "*://www.work.ua/employer/my/vacancies/*/applicants/*",
+        "*://www.work.ua/employer/applicants/*",
+        "*://www.work.ua/resumes*",
+        "*://www.work.ua/resumes-*"
+      ],
+      "js": [
+        "content/work.js"
+      ],
+      "css": [
+        "content/badges.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "*://hh.kz/employer/vacancy/*/responses*",
+        "*://hh.kz/employer/vacancy/*/negotiations*",
+        "*://hh.kz/employer/vacancyresponses*",
+        "*://hh.kz/employer/resume/*",
+        "*://hh.kz/employer/resumefolders*",
+        "*://hh.kz/resume/*",
+        "*://hh.kz/resumes*",
+        "*://hh.kz/search/resume*",
+        "*://*.hh.kz/employer/vacancy/*/responses*",
+        "*://*.hh.kz/employer/vacancy/*/negotiations*",
+        "*://*.hh.kz/employer/vacancyresponses*",
+        "*://*.hh.kz/employer/resume/*",
+        "*://*.hh.kz/employer/resumefolders*",
+        "*://*.hh.kz/resume/*",
+        "*://*.hh.kz/resumes*",
+        "*://*.hh.kz/search/resume*"
+      ],
+      "js": [
+        "content/hhkz.js"
+      ],
+      "css": [
+        "content/badges.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": [
+    "storage",
+    "cookies",
+    "alarms",
+    "webRequest"
+  ],
+  "host_permissions": [
+    "*://robota.ua/*",
+    "*://www.robota.ua/*",
+    "*://employer-api.robota.ua/*",
+    "*://auth-api.robota.ua/*",
+    "*://dracula.robota.ua/*",
+    "*://www.work.ua/*",
+    "*://api.work.ua/*",
+    "*://api.teamtailor.com/*",
+    "*://tt.teamtailor.com/*",
+    "*://app.teamtailor.com/*",
+    "*://*.workers.dev/*",
+    "*://hh.kz/*",
+    "*://*.hh.kz/*",
+    "*://api.hh.kz/*",
+    "*://api.hh.ru/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "icons/*",
+        "help.html",
+        "help.js"
+      ],
+      "matches": [
+        "*://robota.ua/*",
+        "*://www.work.ua/*",
+        "<all_urls>"
+      ]
+    }
+  ]
+}

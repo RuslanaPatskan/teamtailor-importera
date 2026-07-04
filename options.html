@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teamtailor Importera — Налаштування</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; color: #1a1a2e; min-height: 100vh; }
+    .header { background: linear-gradient(135deg, #e84b3c 0%, #c0392b 100%); padding: 20px 32px; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 12px rgba(232,75,60,0.3); }
+    .header-logo { width: 36px; height: 36px; background: rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    .header h1 { color: #fff; font-size: 18px; font-weight: 700; }
+    .header p { color: rgba(255,255,255,0.8); font-size: 12px; margin-top: 2px; }
+    .container { max-width: 700px; margin: 32px auto; padding: 0 16px; display: flex; flex-direction: column; gap: 20px; }
+    .card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .card-title { font-size: 13px; font-weight: 700; color: #e84b3c; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1.5px solid #f0f2f5; display: flex; align-items: center; gap: 8px; }
+    .field { margin-bottom: 16px; }
+    .field:last-child { margin-bottom: 0; }
+    label { display: block; font-size: 12px; font-weight: 600; color: #636e72; margin-bottom: 6px; }
+    input, select { width: 100%; padding: 10px 12px; border: 1.5px solid #dfe6e9; border-radius: 8px; font-size: 13px; color: #2d3436; outline: none; transition: border-color 0.15s, box-shadow 0.15s; background: #fff; }
+    input:focus, select:focus { border-color: #e84b3c; box-shadow: 0 0 0 3px rgba(232,75,60,0.12); }
+    .hint { font-size: 11px; color: #b2bec3; margin-top: 4px; }
+    .tags-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+    .tag-btn { padding: 5px 12px; border-radius: 14px; font-size: 12px; cursor: pointer; border: 1.5px solid #dfe6e9; background: #fff; color: #636e72; transition: all 0.15s; user-select: none; }
+    .tag-btn.active { background: #e84b3c; border-color: #e84b3c; color: #fff; }
+    .status-bar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 8px; font-size: 12px; margin-top: 12px; }
+    .status-bar.ok      { background: #d4edda; color: #155724; }
+    .status-bar.error   { background: #f8d7da; color: #721c24; }
+    .status-bar.loading { background: #e2e3e5; color: #383d41; }
+    .btn-save { width: 100%; padding: 12px; background: linear-gradient(135deg, #e84b3c, #c0392b); color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.15s; margin-top: 8px; box-shadow: 0 4px 12px rgba(232,75,60,0.3); }
+    .btn-save:hover { opacity: 0.9; }
+    .btn-test { background: #f0f2f5; color: #2d3436; border: 1.5px solid #dfe6e9; border-radius: 8px; padding: 8px 16px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+    .btn-test:hover { background: #dfe6e9; }
+    .version { text-align: center; font-size: 11px; color: #b2bec3; padding-bottom: 20px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">🎯</div>
+  <div>
+    <h1>Teamtailor Importera</h1>
+    <p>Налаштування розширення</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Teamtailor API -->
+  <div class="card">
+    <div class="card-title">🔑 Teamtailor API</div>
+    <div class="field">
+      <label>API Ключ</label>
+      <input type="password" id="tt_api_key" placeholder="Вставте ваш API ключ...">
+      <div class="hint">Запитайте у адміністратора або колеги</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="btn-test" id="btn-test-tt">Перевірити ключ</button>
+      <div id="tt-status" class="status-bar" style="display:none;flex:1;"></div>
+    </div>
+  </div>
+
+  <!-- Robota.ua API -->
+  <div class="card">
+    <div class="card-title">🤖 Robota.ua</div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="robota_login" placeholder="recruiter@company.ua">
+    </div>
+    <div class="field">
+      <label>Пароль</label>
+      <input type="password" id="robota_password" placeholder="••••••••">
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="btn-test" id="btn-test-robota">Перевірити</button>
+      <div id="robota-status" class="status-bar" style="display:none;flex:1;"></div>
+    </div>
+  </div>
+
+  <!-- Мій тег -->
+  <div class="card">
+    <div class="card-title">🏷️ Мій тег рекрутера</div>
+    <div class="field">
+      <label>Вибери свій тег</label>
+      <div class="tags-grid" id="tags-grid"></div>
+    </div>
+    <div class="field" style="margin-top:12px;">
+      <label>Або введи вручну</label>
+      <input type="text" id="tag-custom-input" placeholder="наприклад: ruslana (recruiter)">
+    </div>
+  </div>
+
+  <!-- Налаштування за замовчуванням -->
+  <div class="card">
+    <div class="card-title">⚙️ Налаштування за замовчуванням</div>
+    <div class="field">
+      <label>Вакансія</label>
+      <select id="default_job_id"><option value="">— не вибрано —</option></select>
+    </div>
+    <div class="field">
+      <label>Локація</label>
+      <select id="default_loc_id"><option value="">— не вибрано —</option></select>
+    </div>
+    <div class="field">
+      <label>Відділ</label>
+      <select id="default_dept_id"><option value="">— не вибрано —</option></select>
+    </div>
+    <div class="field">
+      <label>Роль</label>
+      <select id="default_role_id"><option value="">— не вибрано —</option></select>
+    </div>
+    <div id="lists-status" class="status-bar" style="display:none;"></div>
+  </div>
+
+  <!-- Кастомні поля -->
+  <div class="card">
+    <div class="card-title">🔗 Кастомні поля</div>
+    <div class="field">
+      <label>API назва поля для robota.ua</label>
+      <input type="text" id="robota_cf_name" placeholder="robota_ua">
+    </div>
+    <div class="field">
+      <label>API назва поля для work.ua</label>
+      <input type="text" id="work_cf_name" placeholder="work_ua">
+    </div>
+  </div>
+
+  <!-- Backend кеш дублів -->
+  <div class="card">
+    <div class="card-title">⚡ Backend кеш</div>
+    <div class="field">
+      <label>URL бекенду</label>
+      <input type="url" id="backend_url" placeholder="https://tt-importera-cache.your-name.workers.dev">
+      <div class="hint">Необов'язково — спільний бекенд вже підключено автоматично</div>
+    </div>
+    <div class="field">
+      <label>Секретний ключ</label>
+      <input type="password" id="backend_secret" placeholder="your-secret-key">
+      <div class="hint">Необов'язково</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:4px;">
+      <button class="btn-test" id="btn-test-backend">Перевірити з'єднання</button>
+      <div id="backend-status" class="status-bar" style="display:none;flex:1;"></div>
+    </div>
+  </div>
+
+  <button class="btn-save" id="btn-save">💾 Зберегти налаштування</button>
+  <div id="save-status" class="status-bar" style="display:none;"></div>
+  <div class="version">Teamtailor Importera v3.9.3</div>
+</div>
+
+<script src="options.js"></script>
+</body>
+</html>

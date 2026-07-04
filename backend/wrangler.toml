@@ -1,0 +1,15 @@
+name            = "tt-importera-cache"
+main            = "worker.js"
+compatibility_date = "2024-09-01"
+
+# KV Namespace для збереження маппінгів
+# Створіть командою: npx wrangler kv:namespace create TT_CACHE
+# Потім вставте отриманий id нижче:
+[[kv_namespaces]]
+binding = "TT_CACHE"
+id      = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+
+# Необов'язково: секретний ключ для захисту API
+# Встановіть через: npx wrangler secret put SECRET
+# [vars]
+# SECRET = ""

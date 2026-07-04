@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teamtailor Importera — Інструкція</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f2f5; color: #1a1a2e; line-height: 1.6; }
+
+    .header { background: linear-gradient(135deg, #e84b3c 0%, #c0392b 100%); padding: 24px 40px; display: flex; align-items: center; gap: 16px; box-shadow: 0 3px 16px rgba(232,75,60,0.35); position: sticky; top: 0; z-index: 100; }
+    .header-logo { width: 44px; height: 44px; background: rgba(255,255,255,0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+    .header h1 { color: #fff; font-size: 20px; font-weight: 700; }
+    .header p  { color: rgba(255,255,255,0.85); font-size: 13px; margin-top: 2px; }
+
+    .nav { background: #fff; border-bottom: 1.5px solid #f0f2f5; padding: 0 40px; display: flex; gap: 4px; overflow-x: auto; }
+    .nav a { display: inline-block; padding: 12px 16px; font-size: 13px; font-weight: 600; color: #636e72; text-decoration: none; border-bottom: 2.5px solid transparent; white-space: nowrap; transition: color 0.15s, border-color 0.15s; }
+    .nav a:hover { color: #e84b3c; }
+    .nav a.active { color: #e84b3c; border-bottom-color: #e84b3c; }
+
+    .wrapper { max-width: 860px; margin: 32px auto; padding: 0 24px 60px; }
+
+    .section-title { font-size: 22px; font-weight: 800; color: #1a1a2e; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #e84b3c; display: flex; align-items: center; gap: 10px; }
+
+    .card { background: #fff; border-radius: 14px; padding: 24px 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 20px; }
+    .card-title { font-size: 13px; font-weight: 700; color: #e84b3c; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+
+    .steps { counter-reset: step; display: flex; flex-direction: column; gap: 16px; }
+    .step { display: flex; gap: 16px; align-items: flex-start; }
+    .step-num { counter-increment: step; flex-shrink: 0; width: 34px; height: 34px; background: linear-gradient(135deg, #e84b3c, #c0392b); color: #fff; border-radius: 50%; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(232,75,60,0.35); }
+    .step-num::before { content: counter(step); }
+    .step-body { flex: 1; padding-top: 5px; }
+    .step-body strong { font-size: 14px; font-weight: 700; color: #2d3436; display: block; margin-bottom: 4px; }
+    .step-body p { font-size: 13px; color: #636e72; margin-top: 4px; }
+    .step-body ul { margin-top: 6px; padding-left: 18px; }
+    .step-body ul li { font-size: 13px; color: #636e72; margin-bottom: 3px; }
+
+    .info-box { border-radius: 8px; padding: 12px 16px; font-size: 13px; margin-top: 12px; line-height: 1.5; }
+    .info-box.blue   { background: #e8f4fd; border: 1.5px solid #bee3f8; color: #2980b9; }
+    .info-box.green  { background: #eafaf1; border: 1.5px solid #a9dfbf; color: #1e8449; }
+    .info-box.yellow { background: #fefcf0; border: 1.5px solid #f9e79f; color: #7d6608; }
+    .info-box.red    { background: #fdf3f3; border: 1.5px solid #f5b7b1; color: #922b21; }
+
+    .badge-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+    .badge { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge.green  { background: #eafaf1; color: #1e8449; border: 1.5px solid #a9dfbf; }
+    .badge.orange { background: #fef9e7; color: #ca6f1e; border: 1.5px solid #f9e79f; }
+    .badge.red    { background: #fdf3f3; color: #922b21; border: 1.5px solid #f5b7b1; }
+
+    .code { background: #2d3436; color: #dfe6e9; border-radius: 8px; padding: 10px 14px; font-family: 'Consolas', 'Monaco', monospace; font-size: 12px; margin-top: 8px; word-break: break-all; }
+
+    .section-gap { margin-top: 44px; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+    th { background: #f0f2f5; color: #636e72; font-weight: 700; text-align: left; padding: 8px 12px; }
+    td { padding: 9px 12px; border-bottom: 1px solid #f0f2f5; color: #2d3436; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+
+    details { border: 1.5px solid #f0f2f5; border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+    summary { padding: 14px 16px; font-size: 13px; font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; background: #fff; }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: '＋'; color: #e84b3c; font-size: 18px; font-weight: 300; transition: transform 0.2s; }
+    details[open] summary::after { content: '－'; }
+    .faq-body { padding: 0 16px 16px; font-size: 13px; color: #636e72; background: #fff; }
+    .faq-body p + p { margin-top: 6px; }
+    .faq-body ul { padding-left: 18px; margin-top: 6px; }
+    .faq-body ul li { margin-bottom: 3px; }
+
+    .platform-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-top: 12px; }
+    @media (max-width: 600px) { .platform-grid { grid-template-columns: 1fr; } }
+    .platform-card { border: 1.5px solid #f0f2f5; border-radius: 10px; padding: 14px 16px; }
+    .platform-card .name { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+    .platform-card .urls { font-size: 11px; color: #636e72; font-family: monospace; line-height: 1.8; }
+
+    .flow-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+    .flow-box { background: #f0f2f5; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; color: #2d3436; }
+    .flow-arrow { color: #b2bec3; font-size: 16px; }
+
+    .version { text-align: center; font-size: 11px; color: #b2bec3; padding: 20px 0 0; }
+    .to-top { position: fixed; bottom: 28px; right: 28px; width: 42px; height: 42px; background: #e84b3c; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; box-shadow: 0 4px 14px rgba(232,75,60,0.45); text-decoration: none; transition: opacity 0.2s; }
+    .to-top:hover { opacity: 0.85; }
+
+    @media (max-width: 600px) {
+      .header { padding: 16px 20px; }
+      .nav    { padding: 0 16px; }
+      .wrapper { padding: 0 12px 60px; }
+      .card   { padding: 18px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">🎯</div>
+  <div>
+    <h1>Teamtailor Importera</h1>
+    <p>Покрокова інструкція — v5.1.3</p>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#install" class="active">📦 Встановлення</a>
+  <a href="#config">⚙️ Налаштування</a>
+  <a href="#badges">🚦 Індикатори</a>
+  <a href="#robota">🟦 robota.ua</a>
+  <a href="#work">🟩 work.ua</a>
+  <a href="#hhkz">🔵 hh.kz</a>
+  <a href="#import">🚀 Імпорт</a>
+  <a href="#resume">📄 Резюме</a>
+  <a href="#faq">❓ FAQ</a>
+</nav>
+
+<div class="wrapper">
+
+  <!-- ══════════════════════════════════ ВСТАНОВЛЕННЯ ══ -->
+  <div id="install" class="section-gap">
+    <div class="section-title">📦 Встановлення розширення</div>
+
+    <div class="card">
+      <div class="card-title">🛒 Встановлення з Chrome Web Store</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Знайдіть розширення в Chrome Web Store</strong>
+            <p>Введіть у пошуку <strong>«Teamtailor Importera»</strong>.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Натисніть «Додати в Chrome»</strong>
+            <p>Підтвердіть встановлення у діалозі.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Закріпіть іконку</strong>
+            <p>Натисніть іконку пазлика 🧩 поруч з адресним рядком → <strong>Teamtailor Importera</strong> → 📌 для закріплення.</p>
+          </div>
+        </div>
+      </div>
+      <div class="info-box green">✅ Після встановлення ви побачите іконку 🎯 в панелі Chrome.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🌐 На яких сайтах працює</div>
+      <div class="platform-grid">
+        <div class="platform-card">
+          <div class="name">🟦 robota.ua</div>
+          <div class="urls">
+            /my/vacancies/{id}/candidates<br>
+            /my/vacancies/{id}/applies<br>
+            /my/vacancies/{id}/interactions<br>
+            /my/vacancies/all/applies<br>
+            /my/candidates<br>
+            /my/cvdb<br>
+            /candidates/*
+          </div>
+        </div>
+        <div class="platform-card">
+          <div class="name">🟩 work.ua</div>
+          <div class="urls">
+            /employer/my/applicants/*<br>
+            /employer/my/responses/*<br>
+            /employer/my/vacancies/*/applicants/*<br>
+            /employer/applicants/*<br>
+            /resumes*<br>
+            /resumes-*
+          </div>
+        </div>
+        <div class="platform-card">
+          <div class="name">🔵 hh.kz</div>
+          <div class="urls">
+            /employer/vacancy/*/responses<br>
+            /employer/vacancy/*/negotiations<br>
+            /employer/vacancyresponses<br>
+            /employer/resume/*<br>
+            /resume/*<br>
+            /search/resume*
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔄 Оновлення</div>
+      <p style="font-size:13px;color:#636e72;">Оновлення встановлюються автоматично через Chrome Web Store. Вручну: <code>chrome://extensions</code> → кнопка <strong>«Оновити»</strong> у верхньому лівому куті.</p>
+      <div class="info-box yellow">⚠️ Після оновлення перезавантажте сторінки robota.ua / work.ua / hh.kz (F5), щоб нова версія активувалась.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ НАЛАШТУВАННЯ ══ -->
+  <div id="config" class="section-gap">
+    <div class="section-title">⚙️ Налаштування</div>
+
+    <div class="card">
+      <div class="card-title">🚪 Відкрити налаштування</div>
+      <p style="font-size:13px;color:#636e72;">Натисніть іконку 🎯 → кнопка <strong>«⚙️ Налаштування»</strong>. Або клікніть правою кнопкою на іконці → <strong>«Параметри»</strong>.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔑 Teamtailor API ключ — обов'язково</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Отримайте API ключ</strong>
+            <p>В Teamtailor: <strong>Settings → API keys</strong> → Create key. Або запросіть у адміністратора.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Вставте ключ та перевірте</strong>
+            <p>Натисніть <strong>«Перевірити ключ»</strong> — статус має стати зеленим ✅.</p>
+          </div>
+        </div>
+      </div>
+      <div class="info-box red">❌ Без API ключа розширення не працює — індикатори не з'являються.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🤖 robota.ua — логін та пароль</div>
+      <p style="font-size:13px;color:#636e72;margin-bottom:12px;">Потрібні для: завантаження резюме (PDF/DOCX), отримання контактів (телефон/email) та тексту супровідного листа.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Введіть email і пароль від акаунта роботодавця robota.ua</strong>
+            <p>Це той самий логін/пароль, що й для входу на robota.ua.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Натисніть «Перевірити»</strong>
+            <p>Розширення отримає JWT-токен і перевірить доступ до robota.ua API.</p>
+          </div>
+        </div>
+      </div>
+      <div class="info-box blue">🔒 Дані зберігаються <strong>лише локально</strong> у вашому браузері та не передаються на сторонні сервери.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏷️ Мій тег рекрутера</div>
+      <p style="font-size:13px;color:#636e72;margin-bottom:12px;">Виберіть свій тег — він автоматично додається до кожного імпортованого кандидата разом з тегом платформи (robota.ua / work.ua / hh.kz).</p>
+      <div class="info-box blue">💡 Теги завантажуються автоматично після введення валідного API ключа TT.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⚙️ Значення за замовчуванням</div>
+      <table>
+        <tr><th>Поле</th><th>Опис</th></tr>
+        <tr><td><strong>Вакансія</strong></td><td>Вакансія в Teamtailor, що підставляється автоматично при кожному імпорті. Можна змінити в модалці для кожного кандидата окремо.</td></tr>
+        <tr><td><strong>Локація</strong></td><td>Офіс / місто за замовчуванням.</td></tr>
+        <tr><td><strong>Відділ</strong></td><td>Відділ за замовчуванням.</td></tr>
+        <tr><td><strong>Роль</strong></td><td>Роль кандидата в Teamtailor (для прив'язки до вакансії).</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔗 Кастомні поля (посилання на профіль)</div>
+      <p style="font-size:13px;color:#636e72;margin-bottom:10px;">Розширення зберігає посилання на оригінальний профіль (robota.ua, work.ua, hh.kz) в кастомних полях Teamtailor.</p>
+      <table>
+        <tr><th>Платформа</th><th>API назва поля за замовчуванням</th></tr>
+        <tr><td>robota.ua</td><td><code>robota_ua</code></td></tr>
+        <tr><td>work.ua</td><td><code>work_ua</code></td></tr>
+      </table>
+      <div class="info-box yellow">⚠️ Спочатку створіть поля в Teamtailor: <strong>Settings → Custom Fields → Candidates</strong>. Тип поля — <strong>Text</strong>. API-назва має точно збігатись (регістр важливий).</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ ІНДИКАТОРИ ══ -->
+  <div id="badges" class="section-gap">
+    <div class="section-title">🚦 Індикатори (кольорові значки)</div>
+
+    <div class="card">
+      <div class="card-title">🎨 Що означають кольори</div>
+      <div class="badge-row">
+        <div class="badge green">🟢 Немає в TT — можна імпортувати</div>
+        <div class="badge red">🔴 Вже є в TT — дублікат</div>
+        <div class="badge orange">🟠 Є в TT, але дані різняться</div>
+      </div>
+      <p style="font-size:13px;color:#636e72;margin-top:14px;">Кожен значок містить кнопку дії:</p>
+      <table style="margin-top:8px;">
+        <tr><th>Статус</th><th>Кнопка</th><th>Дія</th></tr>
+        <tr><td>🟢 Зелений</td><td><code>+TT</code></td><td>Відкрити модалку імпорту</td></tr>
+        <tr><td>🔴 Червоний</td><td><code>↗ TT</code></td><td>Відкрити профіль кандидата в Teamtailor</td></tr>
+        <tr><td>🟠 Помаранчевий</td><td><code>↺ TT</code></td><td>Відкрити модалку оновлення даних</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⏱️ Як відбувається перевірка</div>
+      <div class="flow-row">
+        <div class="flow-box">Сторінка завантажується</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">Значок = 🟢 одразу</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">Пошук дублів у TT (фон)</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">Значок оновлюється до 🔴/🟠 якщо знайдено</div>
+      </div>
+      <div class="info-box blue">💡 Перевірка відбувається у фоні паралельно для всіх карток. Оновлення значка займає зазвичай 1–3 секунди після завантаження сторінки.</div>
+      <p style="font-size:13px;color:#636e72;margin-top:12px;"><strong>Як шукаємо дублів в TT:</strong></p>
+      <ul style="padding-left:20px;margin-top:6px;font-size:13px;color:#636e72;">
+        <li>Якщо є телефон/email → GraphQL (миттєво, 1 запит)</li>
+        <li>Якщо тільки ім'я → пошук за <strong>обома порядками</strong>: «Ім'я Прізвище» та «Прізвище Ім'я» паралельно</li>
+        <li>Знайдений збіг → значок оновлюється одразу</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💾 Збереження статусу між перезавантаженнями</div>
+      <p style="font-size:13px;color:#636e72;margin-bottom:10px;">Після першої перевірки статус зберігається локально. При наступному завантаженні сторінки — значок відображається одразу без очікування.</p>
+      <table>
+        <tr><th>Статус</th><th>Час зберігання</th></tr>
+        <tr><td>🔴 Червоний / 🟠 Помаранчевий</td><td>48 годин</td></tr>
+        <tr><td>🟢 Зелений (є phone/email)</td><td>2 години</td></tr>
+        <tr><td>🟢 Зелений (тільки ім'я)</td><td>30 хвилин</td></tr>
+      </table>
+      <div class="info-box blue">💡 Якщо кандидат був 🔴, але видалений з TT — значок автоматично оновиться при наступному відкритті сторінки (через 4+ години).</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">☑️ Чекбокс для масового імпорту</div>
+      <p style="font-size:13px;color:#636e72;">Ліворуч від кольорового значка є невеликий квадратний чекбокс ☐. Натисніть його для позначення кандидата для масового імпорту. Відмічені картки з'являються в панелі bulk-імпорту внизу екрана.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ ROBOTA.UA ══ -->
+  <div id="robota" class="section-gap">
+    <div class="section-title">🟦 Робота з robota.ua</div>
+
+    <div class="card">
+      <div class="card-title">🔵 Де з'являються індикатори</div>
+      <p style="font-size:13px;color:#636e72;margin-bottom:8px;">Значки з'являються на кожній картці кандидата на сторінках відгуків та кандидатів. Перевірка стартує автоматично при завантаженні сторінки.</p>
+      <div class="info-box yellow">⚠️ Для роботи потрібно бути залогіненим на robota.ua як роботодавець у тому ж браузері.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">➕ Імпорт одного кандидата</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Відкрийте сторінку відгуків</strong>
+            <p>Перейдіть: <code>robota.ua/my/vacancies/{ID}/candidates</code> або аналогічну сторінку.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Зачекайте появи значків 🟢/🔴/🟠</strong>
+            <p>Через 1–3 секунди після завантаження сторінки значки з'являться на кожній картці.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Натисніть «+TT» на картці зеленого кандидата</strong>
+            <p>Розширення завантажить повні дані через API та відкриє модалку імпорту.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Перевірте та доповніть дані в модалці</strong>
+            <ul>
+              <li>Ім'я, прізвище, телефон, email — підтягуються автоматично</li>
+              <li>Виберіть вакансію, локацію, відділ, роль</li>
+              <li>Додайте теги та коментар за потреби</li>
+              <li>Натисніть «⬇️ Завантажити резюме в TT» — резюме прикріпиться до профілю</li>
+            </ul>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Натисніть «✓ Імпортувати»</strong>
+            <p>Розширення створює кандидата в Teamtailor, додає теги, коментар та посилання на профіль robota.ua.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔴 Якщо кандидат вже є в TT</div>
+      <p style="font-size:13px;color:#636e72;margin-bottom:10px;">При натисканні «+TT» (або якщо значок вже 🔴) з'явиться попап:</p>
+      <table>
+        <tr><th>Кнопка</th><th>Дія</th></tr>
+        <tr><td>🔗 Відкрити профіль в TT</td><td>Переходить до наявного кандидата в Teamtailor</td></tr>
+        <tr><td>♻️ Оновити наявний профіль</td><td>Додає відсутні дані (не перезаписує наявні)</td></tr>
+        <tr><td>➕ Все одно додати як нового</td><td>Створює новий профіль (уважно — буде дублікат)</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">☑️ Масовий імпорт</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Відмітьте потрібних кандидатів</strong>
+            <p>Натисніть ☐ чекбокс ліворуч від значка кольору на картках. Можна відмічати тільки зелених — щоб не імпортувати дублі.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Натисніть «⚡ Імпортувати X кандидатів» внизу екрана</strong>
+            <p>З'явиться панель підтвердження. Кандидати обробляються послідовно — прогрес відображається.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Дочекайтесь завершення</strong>
+            <p>Не закривайте вкладку. При помилці 429 (rate limit) розширення автоматично чекає і повторює.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 Детальна картка кандидата (правий сайдбар)</div>
+      <p style="font-size:13px;color:#636e72;">При відкритті картки кандидата в правій панелі з'являється кнопка <strong>«+ Додати в Teamtailor»</strong>. Натисніть — відкриється модалка з даними з API (більше деталей, ніж зі списку).</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔒 Приватний режим (прихоані дані)</div>
+      <p style="font-size:13px;color:#636e72;">Деякі кандидати ховають ім'я до відкриття контактів. Розширення спробує визначити ім'я з доступних джерел. Якщо ім'я не визначено — поля будуть порожніми в модалці (можна заповнити вручну).</p>
+      <div class="info-box blue">💡 Після натискання «+TT» розширення автоматично відкриває контакти через API та підтягує повне ім'я перед показом модалки.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ WORK.UA ══ -->
+  <div id="work" class="section-gap">
+    <div class="section-title">🟩 Робота з work.ua</div>
+
+    <div class="card">
+      <div class="card-title">🔑 Авторизація — не потрібна окремо</div>
+      <p style="font-size:13px;color:#636e72;">Розширення використовує активну сесію браузера. Просто будьте залогінені на work.ua як роботодавець у тому ж браузері Chrome.</p>
+      <div class="info-box green">✅ Підтримується двофакторна автентифікація (2FA) — розширення не запитує паролів.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">➕ Імпорт з картки кандидата</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Відкрийте список кандидатів</strong>
+            <p>Перейдіть: <code>work.ua/employer/my/applicants/</code> або сторінку відгуків на вакансію.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Зачекайте появи значків на картках</strong>
+            <p>Значки з'являються протягом 1–3 секунд. Якщо контакти не видимі в preload — перевірка за ім'ям запускається паралельно.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Натисніть «+TT» на картці</strong>
+            <p>Або натисніть «+ Додати в Teamtailor» у правій панелі після відкриття кандидата.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>В модалці натисніть «⬇️ Завантажити в Teamtailor»</strong>
+            <p>Завантажує PDF або DOCX резюме через браузерну сесію. Після успіху кнопка стає «✅ Резюме завантажено».</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Натисніть «✓ Імпортувати»</strong>
+          </div>
+        </div>
+      </div>
+      <div class="info-box yellow">⚠️ Кнопка завантаження резюме з'являється тільки якщо у кандидата є файл (не тільки онлайн-резюме).</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">☑️ Масовий імпорт</div>
+      <p style="font-size:13px;color:#636e72;">Аналогічно robota.ua — відмітьте чекбокси ☐ на картках та натисніть кнопку «⚡ Імпортувати» внизу екрана. У масовому режимі файли резюме також завантажуються автоматично.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔍 Пошук по базі резюме (/resumes)</div>
+      <p style="font-size:13px;color:#636e72;">Розширення також працює на сторінці пошуку <code>work.ua/resumes*</code>. Значки з'являються на картках резюме в пошуковій видачі.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ HH.KZ ══ -->
+  <div id="hhkz" class="section-gap">
+    <div class="section-title">🔵 Робота з hh.kz</div>
+
+    <div class="card">
+      <div class="card-title">🔑 Авторизація — тільки браузерна сесія</div>
+      <p style="font-size:13px;color:#636e72;">Розширення використовує активну сесію браузера hh.kz. Окремий логін/пароль у налаштуваннях розширення не потрібен.</p>
+      <div class="info-box blue">💡 Для отримання додаткових даних (ім'я, фото) розширення використовує hh.kz API через перехоплення запитів в тому ж браузері.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📍 Де розміщується значок</div>
+      <p style="font-size:13px;color:#636e72;">На сторінці списку відгуків значок розміщується <strong>перед назвою посади</strong> в блоці контенту картки (праворуч від фото). На окремій сторінці резюме — у верхній частині.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">➕ Імпорт кандидата</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Відкрийте сторінку відгуків</strong>
+            <p>Наприклад: <code>hh.kz/employer/vacancy/{ID}/responses</code></p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Натисніть «+TT» поруч з кандидатом</strong>
+            <p>Розширення завантажить дані через hh.kz API. Ім'я та фото підтягуються з prefetch даних сторінки.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Заповніть модалку та імпортуйте</strong>
+            <p>Якщо ім'я не завантажилось — введіть вручну (деякі кандидати hh.kz приховують ПІБ).</p>
+          </div>
+        </div>
+      </div>
+      <div class="info-box yellow">⚠️ На hh.kz імена кандидатів можуть бути приховані до розгляду відгуку. Це обмеження платформи — не помилка розширення.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ ІМПОРТ ══ -->
+  <div id="import" class="section-gap">
+    <div class="section-title">🚀 Модалка імпорту — детально</div>
+
+    <div class="card">
+      <div class="card-title">📋 Поля модалки</div>
+      <table>
+        <tr><th>Поле</th><th>Опис</th><th>Заповнення</th></tr>
+        <tr><td><strong>Ім'я</strong></td><td>Ім'я кандидата (first name)</td><td>Автоматично з API. Можна редагувати.</td></tr>
+        <tr><td><strong>Прізвище</strong></td><td>Прізвище (last name)</td><td>Автоматично з API. Можна редагувати.</td></tr>
+        <tr><td><strong>Телефон</strong></td><td>Нормалізується до +380...</td><td>Автоматично. Видно тільки якщо відкрито контакти.</td></tr>
+        <tr><td><strong>Email</strong></td><td>Використовується для перевірки дублів</td><td>Автоматично. Потрібен для точного пошуку дублів.</td></tr>
+        <tr><td><strong>Вакансія</strong></td><td>Прив'язка до вакансії в TT</td><td>З налаштувань за замовчуванням. Можна змінити.</td></tr>
+        <tr><td><strong>Локація</strong></td><td>Офіс/місто в TT</td><td>З налаштувань. Можна змінити.</td></tr>
+        <tr><td><strong>Відділ</strong></td><td>Відділ в TT</td><td>З налаштувань. Можна змінити.</td></tr>
+        <tr><td><strong>Теги</strong></td><td>Тег платформи + тег рекрутера</td><td>Автоматично. Можна додати свої.</td></tr>
+        <tr><td><strong>Коментар</strong></td><td>Внутрішня нотатка рекрутера</td><td>Вручну. Додається в TT як Activity.</td></tr>
+        <tr><td><strong>Lettera di presentazione</strong></td><td>Текст резюме як cover-letter</td><td>Автоматично. Відображається тільки якщо файл не завантажено.</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔄 Що відбувається при натисканні «✓ Імпортувати»</div>
+      <div class="flow-row">
+        <div class="flow-box">1. Створення кандидата в TT</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">2. Прив'язка до вакансії</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">3. Завантаження резюме</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">4. Додавання тегів і коментаря</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">5. Збереження посилання на профіль</div>
+      </div>
+      <div class="info-box green">✅ Значок на картці автоматично стає 🔴 після успішного імпорту.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">♻️ Оновлення існуючого кандидата (🟠)</div>
+      <p style="font-size:13px;color:#636e72;margin-bottom:10px;">Якщо значок 🟠 (є в TT, але дані різняться) → натисніть «↺ TT» → відкриється модалка з кнопкою «Оновити наявний профіль».</p>
+      <div class="info-box blue">💡 При оновленні заповнюються <strong>тільки відсутні поля</strong> — наявні дані в TT не перезаписуються. Наприклад, якщо в TT вже є email — він не зміниться.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ РЕЗЮМЕ ══ -->
+  <div id="resume" class="section-gap">
+    <div class="section-title">📄 Завантаження резюме</div>
+
+    <div class="card">
+      <div class="card-title">🟦 robota.ua — автоматично при імпорті</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Резюме завантажується автоматично</strong>
+            <p>При натисканні «⬇️ Завантажити резюме в TT» в модалці — розширення завантажує файл через robota.ua API та прикріплює до профілю кандидата в TT.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Підтримувані формати</strong>
+            <p>PDF, DOCX, DOC, RTF — формат визначається автоматично.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Супровідний лист</strong>
+            <p>Якщо кандидат написав covering letter — він автоматично включається в текст резюме (поле Lettera di presentazione).</p>
+          </div>
+        </div>
+      </div>
+      <div class="info-box yellow">⚠️ Потрібен валідний логін/пароль robota.ua в налаштуваннях розширення. Перевірте статус «Перевірити» — має бути зеленим.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🟩 work.ua — через браузерну сесію</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>В модалці натисніть «⬇️ Завантажити в Teamtailor»</strong>
+            <p>Кнопка з'являється тільки якщо у кандидата є файл резюме (тип «file», не «easy» без резюме).</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Завантаження через браузерну сесію</strong>
+            <p>Файл завантажується через www.work.ua з вашою авторизацією — підтримує 2FA без додаткових паролів.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Після успіху</strong>
+            <p>Кнопка змінюється на «✅ Резюме завантажено», поле Lettera di presentazione приховується.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📝 Lettera di presentazione (текстова версія)</div>
+      <p style="font-size:13px;color:#636e72;margin-bottom:8px;">Якщо файл не завантажено — розширення формує текстову версію резюме для поля cover-letter в TT.</p>
+      <p style="font-size:13px;color:#636e72;"><strong>Для robota.ua включає:</strong> посада, очікувана зарплата, текст супровідного листа, досвід роботи, освіта, навички, мови.</p>
+      <p style="font-size:13px;color:#636e72;margin-top:6px;"><strong>Для work.ua:</strong> текст резюме та/або супровідний лист від кандидата.</p>
+      <div class="info-box green">✅ Якщо файл успішно завантажено — текстова версія в TT <strong>не дублюється</strong>.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ FAQ ══ -->
+  <div id="faq" class="section-gap">
+    <div class="section-title">❓ Часті запитання</div>
+
+    <details>
+      <summary>Значки не з'являються на картках</summary>
+      <div class="faq-body">
+        <p>1. Перевірте що введено API ключ Teamtailor: іконка 🎯 → ⚙️ Налаштування → «Перевірити ключ» → статус зелений.</p>
+        <p>2. Перезавантажте сторінку (F5).</p>
+        <p>3. Перевірте URL — розширення працює тільки на сторінках зі списком кандидатів (не на головній).</p>
+        <p>4. Якщо щойно встановили/оновили — перезавантажте розширення: <code>chrome://extensions</code> → toggle on/off.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Значок залишається зеленим хоча кандидат є в TT</summary>
+      <div class="faq-body">
+        <p>Перевірка відбувається у фоні. Якщо значок залишається зеленим довше 5–10 секунд:</p>
+        <ul>
+          <li>TT API може бути повільним або тимчасово недоступним.</li>
+          <li>Ім'я кандидата в TT може відрізнятися від імені на robota.ua/work.ua (наприклад, різний порядок слів або транслітерація).</li>
+          <li>Спробуйте натиснути «+TT» — при кліку відбувається повторна перевірка з реальними контактами (якщо вони є).</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>Ім'я та прізвище порожні в модалці</summary>
+      <div class="faq-body">
+        <p>Можливі причини:</p>
+        <ul>
+          <li>Кандидат приховав ім'я (приватний режим) — заповніть вручну.</li>
+          <li>API robota.ua/work.ua повільно відповів — спробуйте закрити модалку і натиснути «+TT» ще раз.</li>
+          <li>На hh.kz — ім'я може бути приховане до розгляду відгуку.</li>
+        </ul>
+        <p style="margin-top:6px;">Навіть без імені імпорт можливий — заповніть поля вручну в модалці.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Помилка «Не залогінені на robota.ua» при завантаженні резюме</summary>
+      <div class="faq-body">
+        <p>1. В налаштуваннях розширення → «🤖 robota.ua» → введіть правильний email і пароль.</p>
+        <p>2. Натисніть «Перевірити» — має бути зелений статус.</p>
+        <p>3. Переконайтесь що ви залогінені на robota.ua в браузері (деякі API потребують активної сесії).</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Резюме (файл) не завантажується — work.ua</summary>
+      <div class="faq-body">
+        <p>1. Переконайтесь що ви залогінені на work.ua в тому ж браузері.</p>
+        <p>2. Кнопка «⬇️ Завантажити» з'являється тільки у кандидатів з файлом резюме (не всі кандидати мають файл).</p>
+        <p>3. Перезавантажте сторінку work.ua та спробуйте знову.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Помилка 422 при імпорті</summary>
+      <div class="faq-body">
+        <p><strong>422 Unprocessable Entity</strong> — Teamtailor відхилив дані через невалідне поле.</p>
+        <ul>
+          <li>Перевірте формат телефону (має починатись з +).</li>
+          <li>Перевірте email — має бути валідним або порожнім.</li>
+          <li>Якщо помилка повторюється — очистіть телефон або email і спробуйте знову.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>Помилка 429 (rate limit) при масовому імпорті</summary>
+      <div class="faq-body">
+        <p><strong>429 Too Many Requests</strong> — Teamtailor тимчасово обмежив кількість запитів.</p>
+        <p>Розширення автоматично чекає та повторює запит. Під час масового імпорту це нормально — просто зачекайте, не закривайте вкладку.</p>
+        <p>Якщо помилка виникає постійно — зробіть перерву 2–3 хвилини між імпортами.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Кастомні поля (posil. на profil) не заповнюються</summary>
+      <div class="faq-body">
+        <p>1. Переконайтесь що поля створені в TT: <strong>Settings → Custom Fields → Candidates</strong>.</p>
+        <p>2. Тип поля — <strong>Text</strong> (не URL, не Multi-select).</p>
+        <p>3. API-назва поля в налаштуваннях розширення має <strong>точно збігатись</strong> з API Name у TT. Регістр важливий: <code>robota_ua</code> ≠ <code>Robota_UA</code>.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Розширення не активується на сторінці</summary>
+      <div class="faq-body">
+        <p>Перевірте URL сторінки:</p>
+        <ul>
+          <li>robota.ua: <code>robota.ua/my/vacancies/{ID}/candidates</code></li>
+          <li>work.ua: <code>work.ua/employer/my/applicants/</code></li>
+          <li>hh.kz: <code>hh.kz/employer/vacancy/{ID}/responses</code></li>
+        </ul>
+        <p style="margin-top:6px;">Розширення не працює на головній сторінці, сторінці пошуку вакансій або інших розділах. Перейдіть саме на сторінку відгуків/кандидатів.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Як імпортувати кандидатів з кількох вакансій?</summary>
+      <div class="faq-body">
+        <p>Відкрийте кожну вакансію в окремій вкладці та робіть імпорт по черзі. Розширення підтримує кілька вкладок одночасно.</p>
+        <p>В модалці можна вручну змінити вакансію для кожного кандидата (не обов'язково відповідатиме поточній сторінці).</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Яка різниця між «Оновити профіль» і «Все одно додати»?</summary>
+      <div class="faq-body">
+        <p><strong>Оновити профіль</strong> — знаходить існуючого кандидата в TT та додає відсутні дані (телефон, email, теги, посилання). Наявні поля не змінюються.</p>
+        <p><strong>Все одно додати</strong> — створює <em>нового</em> кандидата навіть якщо схожий вже є. Обережно — це створює дублікат у TT.</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="version">Teamtailor Importera v5.1.3 · Для внутрішнього використання</div>
+</div>
+
+<a href="#" class="to-top" title="Вгору">↑</a>
+
+<script src="help.js"></script>
+</body>
+</html>
